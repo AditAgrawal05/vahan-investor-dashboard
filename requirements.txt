@@ -1,0 +1,7 @@
+streamlit
+pandas
+plotly-express
+selenium
+webdriver-manager
+beautifulsoup4
+lxml
