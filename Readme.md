@@ -31,8 +31,16 @@ Create a virtual environment (optional but recommended) and install the required
 pip install -r requirements.txt
 ```
 
-**4. Run the Dashboard:**
-Launch the Streamlit application from your terminal.
+**4. Run the Scrapers (Important):**
+Before launching the dashboard, you must run the scraper scripts to generate the necessary CSV data files.
+```bash
+python manufacturer_scraper.py
+python monthly_scraper.py
+```
+*(Note: While pre-generated CSV files are included in this repository, running the scrapers will ensure you have the most recent data available.)*
+
+**5. Run the Dashboard:**
+Once the CSV files are generated, launch the Streamlit application.
 ```bash
 streamlit run dashboard.py
 ```
@@ -43,8 +51,6 @@ The data for this dashboard was collected from the official [Vahan Parivahan Das
 
 * `manufacturer_scraper.py`: Scrapes the total yearly vehicle registrations for each manufacturer.
 * `monthly_scraper.py`: Scrapes the monthly registration data for each manufacturer, which is then used to calculate quarterly figures.
-
-The generated CSV files are included in this repository.
 
 > **⚠️ Important Note for Re-running Scrapers:**
 > The element ID for the "Refresh" button on the Vahan website changes daily. If you need to re-run the scrapers, you must **manually inspect the webpage** to find the new ID for the refresh button and **update it in both scraper `.py` files**. Look for a line similar to `wait.until(EC.element_to_be_clickable((By.ID, 'j_idt71'))).click()`.
