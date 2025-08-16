@@ -98,7 +98,16 @@ def load_and_process_data():
         for year in year_columns:
             if year - 1 in yearly_pivot.columns:
                 prev_year = year - 1
-                yearly_pivot[f'YoY_Growth_{year}'] = ((yearly_pivot[year] - yearly_pivot[prev_year]) / yearly_pivot[prev_year].replace(0, np.nan)) * 100
+                
+                # Set a threshold to avoid misleading percentages from a low base
+                MIN_BASE_UNITS = 100 
+                
+                # Calculate growth only for manufacturers who meet the threshold
+                growth_values = ((yearly_pivot[year] - yearly_pivot[prev_year]) / yearly_pivot[prev_year].replace(0, np.nan)) * 100
+                
+                # Set growth to 0 for any manufacturer below the minimum base
+                yearly_pivot[f'YoY_Growth_{year}'] = np.where(yearly_pivot[prev_year] < MIN_BASE_UNITS, 0, growth_values)
+                
                 yearly_pivot[f'YoY_Growth_{year}'] = yearly_pivot[f'YoY_Growth_{year}'].fillna(0).round(2)
 
         return yearly_pivot, quarterly_totals
@@ -178,8 +187,10 @@ if yearly_data is not None and quarterly_data is not None:
         st.subheader(f"YoY Growth by Manufacturer ({selected_category})")
         yoy_col_name = f'YoY_Growth_{selected_year}'
         if yoy_col_name in filtered_yearly_data.columns:
+            # Filter out the 0-growth entries for a cleaner chart
+            chart_data = filtered_yearly_data[filtered_yearly_data[yoy_col_name] != 0]
             fig_yoy = px.bar(
-                filtered_yearly_data.sort_values(yoy_col_name, ascending=False).head(15),
+                chart_data.sort_values(yoy_col_name, ascending=False).head(15),
                 x='Manufacturer', y=yoy_col_name,
                 title=f'Top 15 Manufacturers by YoY Growth ({selected_year} vs {prev_year})',
                 labels={yoy_col_name: 'YoY Growth (%)', 'Manufacturer': 'Manufacturer'},
